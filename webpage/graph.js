@@ -1,7 +1,5 @@
 var xWidth = Math.max(window.innerWidth - 150, 700);
 
-$('#title').css('margin-left', xWidth - 50 - $('#title').width() - $('#inputspan').width());
-
 var barWidth = 2;
 var numBars = Math.floor(xWidth/2);
 
@@ -32,8 +30,12 @@ var tooltip = d3.select("body")
 //loads unemployment data in rawdata and attaches a date object 
 var book;
 d3.json("mobydick.json", function(error, input) {
+
 	book = input;
 	book.ltext = book.text.toLowerCase();
+
+	//removes placeholder loading text
+	document.getElementById('loadingText').innerHTML = '';
 
 	//0s out data array
 	resetData();
@@ -44,7 +46,8 @@ d3.json("mobydick.json", function(error, input) {
 		.append("text")
 			.attr("transform", "translate("+ (-80/2) +","+(height/2)+")rotate(-90)")
 			.style("text-anchor", "middle")
-			.text("Frequency (per 400 words)");
+			.attr("font-size",'110%')
+			.text("Frequency (per " + Math.round(book.text.length/(numBars*7)/100)*100 + " words)");
 
 	//draws histogram bars
 	svg.selectAll('.bar')
@@ -58,28 +61,12 @@ d3.json("mobydick.json", function(error, input) {
 		.on("mouseover", function(){
 
 			var cord = d3.mouse(this);
-			console.log(cord);
 			var position = findIndex(Math.floor(cord[0]/barWidth), Math.floor(y.invert(cord[1])));
 			d3.select(this).style("fill", "#435A82");
 			document.getElementById("context").innerHTML = indexText(indices[position]).replace(new RegExp('(' + word  + ')', 'gi'), "<b>$1</b>").replace(/\n\r?/g, '<br />');
-
-			// var cord = d3.mouse(this);
-			// position = findIndex(Math.floor(cord[0]/numBars), Math.floor(y.invert(cord[1])));
-			// d3.select(this).style("fill", "#435A82");
-			// //console.log(position);
-			// if (position > -1){
-			// 	document.getElementById("context").innerHTML = indexText(indices[position]).replace(new RegExp('(' + word  + ')', 'gi'), "<b>$1</b>").replace(/\n\r?/g, '<br />');
-			// }
+			document.getElementById("chapterTitle").innerHTML = getChapter(indices[position]);
 		})
 		.on("mousemove", function(){			
-			// var cord = (typeof event === 'undefined') ? ffm : [event.pageX, event.pageY];
-			// xOffset = ((cord[0] - 150) > width/2) ? -10 - document.getElementById("tooltip").offsetWidth : 10;
-			// tooltip.style("top", (cord[1]-10)+"px").style("left",(cord[0]+xOffset)+"px");
-			// console.log("s xat " + cord[0] + " win at " + window.innerWidth + " tt " + $('#tooltip').width())
-			// if ((xOffset == 10) && window.innerWidth - cord[0] - $('#tooltip').width() < 0){
-			// 	console.log("s xat " + cord[0] + " win at " + window.innerWidth + " tt " + $('#tooltip').width())
-			// 	document.getElementById("tooltip").innerHTML = document.getElementById("tooltip").innerHTML.replace('<br>', ' ');
-			// }
 		})
 		.on("mouseout", function (){
 			d3.select(this).style("fill", "");
@@ -114,6 +101,13 @@ d3.json("mobydick.json", function(error, input) {
 				d3.select(this).style("fill","");
 			});
 
+		$('#footer').css('margin-left', xWidth/2 - 180);
+
+		d3.select("#container").style("display", "block");
+		d3.select("#footerInfo").style("display", "block");
+
+		 $('#autocomplete').focus()
+
 	}
 });
 
@@ -142,10 +136,22 @@ function indexText(index){
 	return book.text.substring(start + 1, end);
 }
 
-var data = [];
-var indices = [];
-var word;
+//returns chapter title index is in
+function getChapter(index){
+	console.log(index);
+	var i = 0;
+	while (book.chapterStarts[i] < index){
+		i = i + 1;
+	}
+	console.log(i);
+	return book.chapterTitles[i-1];
+}
 
+var data = [];			//height of bars, representing occurences of match per bucket of x chars
+var indices = [];		//array of indexOfs of each occurences of word in 
+var word;				//matched word (or string) 
+
+//redraws graph for new match
 function updateGraph(match){
 	updateData(match);
 
@@ -160,6 +166,7 @@ function updateGraph(match){
 			.attr("height", function(d){return height - y(d);});			
 };
 
+//updates bar height values
 function updateData(match){
 	resetData();
 	indices = indexOfArray(match);
@@ -169,12 +176,14 @@ function updateData(match){
 	}
 }
 
+//0s out bar height array
 function resetData(){
 	for (var i = 0; i < numBars; i++){
 		data[i] = 0;
 	}
 }
 
+//creates array containing positions of each occurence of word
 function indexOfArray(match) {
 	match = match.toLowerCase();
 	var indices = [];
@@ -187,18 +196,11 @@ function indexOfArray(match) {
 	return indices;
 }
 
-//firefox doesn't capture mousemove propertly
-var ffm;
-function onMouseMove(e){
-	ffm = [e.clientX, e.clientY];
-}
-document.addEventListener('mousemove', onMouseMove, false);
-
-
 function updateWord(){
 	word = $("#autocomplete").val();
 	if (word.length > 0){
 		updateGraph(word);
+		d3.select("#wordNum").text(indices.length);
 		d3.select("#wordText").text(word);
 		d3.select("#title").style("visibility", "visible");
 	}
@@ -207,11 +209,15 @@ function updateWord(){
 	}
 }
 
+var autoclose = false;
+
+//update graph and close autocomplete
 $('#autocomplete').keyup(function(e){
 	if(e.keyCode == 13)
 	{
 		updateWord();
 		$(this).autocomplete("close");
+		setTimeout(function(){$('#autocomplete').autocomplete("close");}, 100);
 	}
 });
 
@@ -219,7 +225,7 @@ $('#autocomplete').keyup(function(e){
 $( "#autocomplete" ).autocomplete({
 	minLength: 0,
 	select: function( event, ui ) {
-		updateWord();
+		setTimeout(function(){updateWord();}, 50);
 	},
 	source: function( request, response ) {
 		str = request.term.toLowerCase();
@@ -244,3 +250,10 @@ $( "#autocomplete" ).autocomplete({
         	.append( "<a class = 'dropDown'><strong>" + item.bold + "</strong>" + item.nbold + " " + item.number + "</a>" )
         	.appendTo( ul );
 	};
+
+//firefox doesn't capture mousemove propertly
+var ffm;
+function onMouseMove(e){
+	ffm = [e.clientX, e.clientY];
+}
+document.addEventListener('mousemove', onMouseMove, false);

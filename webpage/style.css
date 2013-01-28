@@ -1,5 +1,5 @@
 body{
-
+font-family: georgia;
 }
 
 #whalewords{
@@ -7,7 +7,13 @@ body{
   text-align: center;
 }
 
+#loadingText{
+  color: grey;
+  text-align: center;
+}
+
 #container{
+  display: none;
 }
 
 #headerText{
@@ -18,8 +24,14 @@ body{
   display:inline;
 }
 
+#inputspan{
+  float: left;
+}
+
 #title{
   visibility: hidden;
+  float: right;
+  margin-right: 80px;
 }
 
 #wordText{
@@ -28,9 +40,22 @@ body{
   font-weight: bold;
 }
 
+#bookText{
+  margin-left: 70px;
+}
+
 #context{
   height:200px;
   overflow:hidden;
+}
+
+#chapterTitle{
+  font-size: 120%;
+}
+
+#footerInfo{
+  text-align: center;
+  display: none;
 }
 
 .right{
@@ -76,4 +101,14 @@ body{
   font-size: 110%;
   box-shadow: 2px 2px 3px #000;
   border: 1px solid grey;
+}
+
+.blacklink{  -webkit-user-select: none; /* Chrome/Safari */        
+
+  font-size: 100%;
+}
+
+.ui-widget {
+  font-family: georgia !important;
+  font-size: 1em !important;
 }
