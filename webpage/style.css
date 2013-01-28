@@ -1,0 +1,79 @@
+body{
+
+}
+
+#whalewords{
+  font-size: 200%;  
+  text-align: center;
+}
+
+#container{
+}
+
+#headerText{
+  margin-left: 70px;
+}
+
+#wordForm{
+  display:inline;
+}
+
+#title{
+  visibility: hidden;
+}
+
+#wordText{
+  font-variant:small-caps;
+  font-size: 110%;
+  font-weight: bold;
+}
+
+#context{
+  height:200px;
+  overflow:hidden;
+}
+
+.right{
+  float: right;
+}
+
+.dropDown{
+  text-transform: capitalize;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: #647EAA;
+}
+
+.bbar{
+	fill:steelblue;
+}
+
+.chapter.light{
+	fill:lightgrey;
+}
+
+.chapter.dark{
+	fill:grey;
+}
+
+.x.axis path {
+  display: none;
+}
+
+#tooltip {
+  position:absolute;
+  z-index: 10;
+  visibility: hidden;
+  background-color: white;
+  font-size: 110%;
+  box-shadow: 2px 2px 3px #000;
+  border: 1px solid grey;
+}
