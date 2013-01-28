@@ -1,5 +1,5 @@
 import nltk
-from nltk.book import *
+text1 = nltk.Text(nltk.word_tokenize(text.lower().replace('.', ' ')))
 
 freq = FreqDist(text1)
 keys = freq.keys()[:200]
